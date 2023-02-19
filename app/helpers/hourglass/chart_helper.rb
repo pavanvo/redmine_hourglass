@@ -9,7 +9,7 @@ module Hourglass
 
       if chart_query.valid?
         hours_per_date_without_column = hours_per_date chart_query
-        dates = hours_per_date_without_column.keys.compact.sort
+        dates = hours_per_date_without_column&.keys&.compact&.sort
         if dates.present?
           group_key_is_string = dates.first.is_a?(String)
           date_range = group_key_is_string ? (Date.parse(dates.first)..Date.parse(dates.last)) : (dates.first..dates.last)
@@ -34,7 +34,7 @@ module Hourglass
     end
 
     def hours_per_date(query)
-      query.total_by_group_for(:hours).transform_values do |totals_by_column|
+      query.total_by_group_for(:hours)&.transform_values do |totals_by_column|
         totals_by_column = {default: totals_by_column} unless query.main_query.grouped?
         totals_by_column.transform_keys! { |_| :default } if query.main_query.group_by == 'date'
         Hash[totals_by_column.map { |column, total| [column, unrounded_total(total)] }]
